@@ -10,26 +10,18 @@ public class QuantityMeasurementApp {
         System.out.println("Equality Demo:");
         System.out.println(l1 + " == " + l2 + " ? " + l1.equals(l2));
 
-        System.out.println("\nConversion Demo:");
+        System.out.println("\nAddition Demo:");
 
-        System.out.println("1 FEET -> INCHES = " +
-                Length.convert(1.0,
-                        Length.LengthUnit.FEET,
-                        Length.LengthUnit.INCHES));
+        Length result1 = l1.add(l2);
+        System.out.println("1 FEET + 12 INCHES = " + result1);
 
-        System.out.println("3 YARDS -> FEET = " +
-                Length.convert(3.0,
-                        Length.LengthUnit.YARDS,
-                        Length.LengthUnit.FEET));
+        Length yard = new Length(1.0, Length.LengthUnit.YARDS);
+        Length feet = new Length(3.0, Length.LengthUnit.FEET);
 
-        System.out.println("36 INCHES -> YARDS = " +
-                Length.convert(36.0,
-                        Length.LengthUnit.INCHES,
-                        Length.LengthUnit.YARDS));
+        Length result2 = yard.add(feet);
+        System.out.println("1 YARD + 3 FEET = " + result2);
 
-        System.out.println("1 CM -> INCHES = " +
-                Length.convert(1.0,
-                        Length.LengthUnit.CENTIMETERS,
-                        Length.LengthUnit.INCHES));
+        Length result3 = Length.add(l1, l2, Length.LengthUnit.INCHES);
+        System.out.println("Static add result in INCHES = " + result3);
     }
 }

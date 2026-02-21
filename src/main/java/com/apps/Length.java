@@ -3,8 +3,8 @@ package com.apps;
 import java.util.Objects;
 
 /**
- * Immutable value object representing a length.
- * Base unit = INCHES.
+ * Immutable Value Object representing Length.
+ * Base Unit = INCHES
  */
 public final class Length {
 
@@ -12,13 +12,12 @@ public final class Length {
 
     private final double value;
     private final LengthUnit unit;
-    
-    /**
-     * Enum storing conversion factors relative to INCHES.
-     */
+
+    // ---------------- ENUM ----------------
+
     public enum LengthUnit {
 
-        INCHES(1.0),        // Base unit
+        INCHES(1.0),
         FEET(12.0),
         YARDS(36.0),
         CENTIMETERS(0.393701);
@@ -38,11 +37,12 @@ public final class Length {
         }
     }
 
+    // ---------------- CONSTRUCTOR ----------------
+
     public Length(double value, LengthUnit unit) {
 
-        if (!Double.isFinite(value)) {
+        if (!Double.isFinite(value))
             throw new IllegalArgumentException("Value must be finite.");
-        }
 
         this.unit = Objects.requireNonNull(unit, "Unit cannot be null.");
         this.value = value;
@@ -51,17 +51,18 @@ public final class Length {
     public double getValue() {
         return value;
     }
-    
+
     public LengthUnit getUnit() {
         return unit;
     }
 
-    // Normalize to base unit
+    // ---------------- BASE NORMALIZATION ----------------
+
     private double toBaseUnit() {
         return unit.toInches(value);
     }
 
-    // ---------------- UC5 STATIC CONVERSION ----------------
+    // ---------------- UC5 : STATIC CONVERT ----------------
 
     public static double convert(double value,
                                  LengthUnit source,
@@ -88,7 +89,40 @@ public final class Length {
         return new Length(converted, targetUnit);
     }
 
-    // ---------------- UC4 EQUALITY ----------------
+    // ---------------- UC6 : ADDITION ----------------
+
+    /**
+     * Adds another Length to this Length.
+     * Result is returned in the unit of THIS object.
+     */
+    public Length add(Length other) {
+
+        Objects.requireNonNull(other, "Second operand cannot be null.");
+
+        double sumInBase = this.toBaseUnit() + other.toBaseUnit();
+
+        double resultValue = unit.fromInches(sumInBase);
+
+        return new Length(resultValue, this.unit);
+    }
+
+    /**
+     * Static addition method with target unit.
+     */
+    public static Length add(Length l1, Length l2, LengthUnit targetUnit) {
+
+        Objects.requireNonNull(l1, "First operand cannot be null.");
+        Objects.requireNonNull(l2, "Second operand cannot be null.");
+        Objects.requireNonNull(targetUnit, "Target unit cannot be null.");
+
+        double sumInBase = l1.toBaseUnit() + l2.toBaseUnit();
+
+        double resultValue = targetUnit.fromInches(sumInBase);
+
+        return new Length(resultValue, targetUnit);
+    }
+
+    // ---------------- UC4 : EQUALITY ----------------
 
     @Override
     public boolean equals(Object obj) {
@@ -108,6 +142,6 @@ public final class Length {
 
     @Override
     public String toString() {
-        return String.format("%.6f %s", value, unit);
+        return String.format("Quantity(%.6f, %s)", value, unit);
     }
 }
