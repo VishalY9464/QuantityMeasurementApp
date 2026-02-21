@@ -62,7 +62,13 @@ public final class Length {
         return unit.toInches(value);
     }
 
-    // ---------------- UC5 : STATIC CONVERT ----------------
+    // ---------------- ROUNDING UTILITY ----------------
+
+    private static double round(double value) {
+        return Math.round(value * 1_000_000d) / 1_000_000d;
+    }
+
+    // ---------------- UC5 : CONVERSION ----------------
 
     public static double convert(double value,
                                  LengthUnit source,
@@ -75,10 +81,11 @@ public final class Length {
         Objects.requireNonNull(target, "Target unit cannot be null.");
 
         double inches = source.toInches(value);
-        return target.fromInches(inches);
+        double result = target.fromInches(inches);
+
+        return round(result);
     }
 
-    // Instance conversion
     public Length convertTo(LengthUnit targetUnit) {
 
         Objects.requireNonNull(targetUnit, "Target unit cannot be null.");
@@ -86,43 +93,44 @@ public final class Length {
         double inches = toBaseUnit();
         double converted = targetUnit.fromInches(inches);
 
-        return new Length(converted, targetUnit);
+        return new Length(round(converted), targetUnit);
     }
 
-    // ---------------- UC6 : ADDITION ----------------
+    // ---------------- PRIVATE ADDITION CORE ----------------
 
-    /**
-     * Adds another Length to this Length.
-     * Result is returned in the unit of THIS object.
-     */
+    private static Length addInternal(Length l1,
+                                      Length l2,
+                                      LengthUnit targetUnit) {
+
+        double sumInBase = l1.toBaseUnit() + l2.toBaseUnit();
+        double resultValue = targetUnit.fromInches(sumInBase);
+
+        return new Length(round(resultValue), targetUnit);
+    }
+
+    // ---------------- UC6 ----------------
+
     public Length add(Length other) {
 
         Objects.requireNonNull(other, "Second operand cannot be null.");
 
-        double sumInBase = this.toBaseUnit() + other.toBaseUnit();
-
-        double resultValue = unit.fromInches(sumInBase);
-
-        return new Length(resultValue, this.unit);
+        return addInternal(this, other, this.unit);
     }
 
-    /**
-     * Static addition method with target unit.
-     */
-    public static Length add(Length l1, Length l2, LengthUnit targetUnit) {
+    // ---------------- UC7 ----------------
+
+    public static Length add(Length l1,
+                             Length l2,
+                             LengthUnit targetUnit) {
 
         Objects.requireNonNull(l1, "First operand cannot be null.");
         Objects.requireNonNull(l2, "Second operand cannot be null.");
         Objects.requireNonNull(targetUnit, "Target unit cannot be null.");
 
-        double sumInBase = l1.toBaseUnit() + l2.toBaseUnit();
-
-        double resultValue = targetUnit.fromInches(sumInBase);
-
-        return new Length(resultValue, targetUnit);
+        return addInternal(l1, l2, targetUnit);
     }
 
-    // ---------------- UC4 : EQUALITY ----------------
+    // ---------------- UC4 EQUALITY ----------------
 
     @Override
     public boolean equals(Object obj) {
