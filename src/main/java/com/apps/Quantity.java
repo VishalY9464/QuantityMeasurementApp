@@ -4,72 +4,93 @@ import java.util.Objects;
 
 public class Quantity<U extends IMeasurable> {
 
-    private final double value; // value of quantity
-    private final U unit;       // unit type
+	private final double value; // value of quantity
+	private final U unit; // unit type
 
-    public Quantity(double value, U unit) {
-        if (unit == null)
-            throw new IllegalArgumentException("Unit cannot be null"); // validation
-        if (Double.isNaN(value))
-            throw new IllegalArgumentException("Invalid value");
+	public Quantity(double value, U unit) {
+		if (unit == null)
+			throw new IllegalArgumentException("Unit cannot be null"); // validation
+		if (Double.isNaN(value))
+			throw new IllegalArgumentException("Invalid value");
 
-        this.value = value;
-        this.unit = unit;
-    }
+		this.value = value;
+		this.unit = unit;
+	}
 
-    public double getValue() {
-        return value;
-    }
+	public double getValue() {
+		return value;
+	}
 
-    public U getUnit() {
-        return unit;
-    }
+	public U getUnit() {
+		return unit;
+	}
 
-    private double toBaseUnit() {
-        return unit.convertToBaseUnit(value); // convert to base
-    }
+	private double toBaseUnit() {
+		return unit.convertToBaseUnit(value); // convert to base
+	}
 
-    public Quantity<U> convertTo(U targetUnit) {
-        if (targetUnit == null)
-            throw new IllegalArgumentException("Target unit cannot be null");
+	public Quantity<U> convertTo(U targetUnit) {
+		if (targetUnit == null)
+			throw new IllegalArgumentException("Target unit cannot be null");
 
-        double baseValue = toBaseUnit(); // step1 base
-        double convertedValue = targetUnit.convertFromBaseUnit(baseValue); // step2 target
+		double baseValue = toBaseUnit(); // step1 base
+		double convertedValue = targetUnit.convertFromBaseUnit(baseValue); // step2 target
 
-        return new Quantity<>(convertedValue, targetUnit);
-    }
+		return new Quantity<>(convertedValue, targetUnit);
+	}
 
-    public Quantity<U> add(Quantity<U> other) {
-        if (other == null)
-            throw new IllegalArgumentException("Cannot add null quantity");
+	// add same type quantities
+	public Quantity<U> add(Quantity<U> other) {
 
-        double sumBase = this.toBaseUnit() + other.toBaseUnit(); // base addition
-        double resultValue = unit.convertFromBaseUnit(sumBase);  // back to this unit
+		if (other == null)
+			throw new IllegalArgumentException("Quantity cannot be null");
 
-        return new Quantity<>(resultValue, unit);
-    }
+		// 🚨 category check (VERY IMPORTANT)
+		if (!this.unit.getClass().equals(other.unit.getClass()))
+			throw new IllegalArgumentException("Incompatible unit categories");
 
-    public Quantity<U> add(Quantity<U> other, U targetUnit) {
-        if (other == null || targetUnit == null)
-            throw new IllegalArgumentException("Invalid arguments");
+		double baseSum = this.unit.convertToBaseUnit(this.value) + other.unit.convertToBaseUnit(other.value);
 
-        double sumBase = this.toBaseUnit() + other.toBaseUnit(); // base addition
-        double resultValue = targetUnit.convertFromBaseUnit(sumBase); // convert target
+		double result = this.unit.convertFromBaseUnit(baseSum);
 
-        return new Quantity<>(resultValue, targetUnit);
-    }
+		return new Quantity<>(result, this.unit);
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true; // same ref
-        if (obj == null || getClass() != obj.getClass()) return false;
+	// add with target unit
+	public Quantity<U> add(Quantity<U> other, U targetUnit) {
 
-        Quantity<?> other = (Quantity<?>) obj;
-        return Math.abs(this.toBaseUnit() - other.toBaseUnit()) < 0.01; // compare base
-    }
+		if (other == null || targetUnit == null)
+			throw new IllegalArgumentException("Invalid input");
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(Math.round(toBaseUnit() * 100.0) / 100.0);
-    }
+		// 🚨 category check
+		if (!this.unit.getClass().equals(other.unit.getClass()))
+			throw new IllegalArgumentException("Incompatible unit categories");
+
+		double baseSum = this.unit.convertToBaseUnit(this.value) + other.unit.convertToBaseUnit(other.value);
+
+		double result = targetUnit.convertFromBaseUnit(baseSum);
+
+		return new Quantity<>(result, targetUnit);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true; // same ref
+		if (obj == null || getClass() != obj.getClass())
+			return false;
+
+		Quantity<?> other = (Quantity<?>) obj;
+		return Math.abs(this.toBaseUnit() - other.toBaseUnit()) < 0.01; // compare base
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(Math.round(toBaseUnit() * 100.0) / 100.0);
+	}
+
+	@Override
+	public String toString() {
+		return value + " " + unit.getUnitName();
+	}
 }
