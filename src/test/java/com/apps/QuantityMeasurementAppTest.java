@@ -5,247 +5,229 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class QuantityMeasurementAppTest {
 
-    private static final double EPSILON = 1e-6;
-
-    // =====================================================
-    // UC8 – Standalone LengthUnit Tests
-    // =====================================================
+    // ================================
+    // LENGTH ENUM TESTS
+    // ================================
 
     @Test
-    public void testLengthUnitEnum_FeetConstant() {
-        assertEquals(1.0,
-                LengthUnit.FEET.getConversionFactor(),
-                EPSILON);
+    public void testLengthUnitConversionFactor() {
+        assertEquals(12.0, LengthUnit.FEET.getConversionFactor(), 0.0001);
+        assertEquals(1.0, LengthUnit.INCHES.getConversionFactor(), 0.0001);
+        assertEquals(36.0, LengthUnit.YARDS.getConversionFactor(), 0.0001);
+        assertEquals(0.393701, LengthUnit.CENTIMETERS.getConversionFactor(), 0.0001);
     }
 
     @Test
-    public void testLengthUnitEnum_InchesConstant() {
-        assertEquals(1.0 / 12.0,
-                LengthUnit.INCHES.getConversionFactor(),
-                EPSILON);
+    public void testLengthConvertToBase() {
+        assertEquals(12.0, LengthUnit.FEET.convertToBaseUnit(1), 0.01);
+        assertEquals(12.0, LengthUnit.INCHES.convertToBaseUnit(12), 0.01);
+        assertEquals(36.0, LengthUnit.YARDS.convertToBaseUnit(1), 0.01);
+        assertEquals(12.0, LengthUnit.CENTIMETERS.convertToBaseUnit(30.48), 0.5);
     }
 
     @Test
-    public void testLengthUnitEnum_YardsConstant() {
-        assertEquals(3.0,
-                LengthUnit.YARDS.getConversionFactor(),
-                EPSILON);
+    public void testLengthConvertFromBase() {
+        assertEquals(1.0, LengthUnit.FEET.convertFromBaseUnit(12), 0.01);
+        assertEquals(12.0, LengthUnit.INCHES.convertFromBaseUnit(12), 0.01);
+        assertEquals(1.0, LengthUnit.YARDS.convertFromBaseUnit(36), 0.01);
+    }
+
+    // ================================
+    // WEIGHT ENUM TESTS
+    // ================================
+
+    @Test
+    public void testWeightUnitConversionFactor() {
+        assertEquals(0.001, WeightUnit.MILLIGRAM.getConversionFactor(), 0.0001);
+        assertEquals(1.0, WeightUnit.GRAM.getConversionFactor(), 0.0001);
+        assertEquals(1000.0, WeightUnit.KILOGRAM.getConversionFactor(), 0.0001);
+        assertEquals(453.592, WeightUnit.POUND.getConversionFactor(), 0.0001);
+        assertEquals(1_000_000.0, WeightUnit.TONNE.getConversionFactor(), 0.0001);
     }
 
     @Test
-    public void testLengthUnitEnum_CentimetersConstant() {
-        assertEquals(1.0 / 30.48,
-                LengthUnit.CENTIMETERS.getConversionFactor(),
-                EPSILON);
-    }
-
-    // =====================================================
-    // Base Unit Conversion Tests
-    // =====================================================
-
-    @Test
-    public void testConvertToBaseUnit_InchesToFeet() {
-        assertEquals(1.0,
-                LengthUnit.INCHES.convertToBaseUnit(12.0),
-                EPSILON);
+    public void testWeightConvertToBase() {
+        assertEquals(1000.0, WeightUnit.KILOGRAM.convertToBaseUnit(1), 0.01);
+        assertEquals(1000.0, WeightUnit.GRAM.convertToBaseUnit(1000), 0.01);
     }
 
     @Test
-    public void testConvertToBaseUnit_YardsToFeet() {
-        assertEquals(3.0,
-                LengthUnit.YARDS.convertToBaseUnit(1.0),
-                EPSILON);
+    public void testWeightConvertFromBase() {
+        assertEquals(1.0, WeightUnit.KILOGRAM.convertFromBaseUnit(1000), 0.01);
+    }
+
+    // ================================
+    // QUANTITY EQUALITY TESTS
+    // ================================
+
+    @Test
+    public void testLengthEquality() {
+        assertTrue(new Quantity<>(1, LengthUnit.FEET)
+                .equals(new Quantity<>(12, LengthUnit.INCHES)));
     }
 
     @Test
-    public void testConvertToBaseUnit_CentimetersToFeet() {
-        assertEquals(1.0,
-                LengthUnit.CENTIMETERS.convertToBaseUnit(30.48),
-                EPSILON);
+    public void testWeightEquality() {
+        assertTrue(new Quantity<>(1, WeightUnit.KILOGRAM)
+                .equals(new Quantity<>(1000, WeightUnit.GRAM)));
     }
 
     @Test
-    public void testConvertFromBaseUnit_FeetToInches() {
-        assertEquals(12.0,
-                LengthUnit.INCHES.convertFromBaseUnit(1.0),
-                EPSILON);
+    public void testNotEqualDifferentValues() {
+        assertFalse(new Quantity<>(1, LengthUnit.FEET)
+                .equals(new Quantity<>(10, LengthUnit.INCHES)));
     }
 
     @Test
-    public void testConvertFromBaseUnit_FeetToYards() {
-        assertEquals(1.0,
-                LengthUnit.YARDS.convertFromBaseUnit(3.0),
-                EPSILON);
+    public void testEqualsNull() {
+        assertFalse(new Quantity<>(1, LengthUnit.FEET).equals(null));
     }
 
     @Test
-    public void testConvertFromBaseUnit_FeetToCentimeters() {
-        assertEquals(30.48,
-                LengthUnit.CENTIMETERS.convertFromBaseUnit(1.0),
-                EPSILON);
-    }
-
-    // =====================================================
-    // UC4 – Equality Tests
-    // =====================================================
-
-    @Test
-    public void testEquality_CrossUnits() {
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(12.0, LengthUnit.INCHES);
-
-        assertTrue(l1.equals(l2));
+    public void testEqualsDifferentType() {
+        assertFalse(new Quantity<>(1, LengthUnit.FEET).equals("test"));
     }
 
     @Test
-    public void testEquality_Transitive() {
-
-        Length yard = new Length(1.0, LengthUnit.YARDS);
-        Length feet = new Length(3.0, LengthUnit.FEET);
-        Length inches = new Length(36.0, LengthUnit.INCHES);
-
-        assertTrue(yard.equals(feet));
-        assertTrue(feet.equals(inches));
-        assertTrue(yard.equals(inches));
+    public void testSameReference() {
+        Quantity<LengthUnit> q = new Quantity<>(1, LengthUnit.FEET);
+        assertTrue(q.equals(q));
     }
 
-    // =====================================================
-    // UC5 – Conversion Tests
-    // =====================================================
+    // ================================
+    // CONVERSION TESTS
+    // ================================
 
     @Test
-    public void testConvert_Method() {
+    public void testLengthConversion() {
+        Quantity<LengthUnit> result =
+                new Quantity<>(1, LengthUnit.FEET).convertTo(LengthUnit.INCHES);
 
-        double result = Length.convert(
-                1.0,
-                LengthUnit.FEET,
-                LengthUnit.INCHES);
-
-        assertEquals(12.0, result, EPSILON);
+        assertEquals(12, result.getValue(), 0.01);
     }
 
     @Test
-    public void testConvertTo_ObjectMethod() {
+    public void testWeightConversion() {
+        Quantity<WeightUnit> result =
+                new Quantity<>(1, WeightUnit.KILOGRAM).convertTo(WeightUnit.GRAM);
 
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length result = l1.convertTo(LengthUnit.INCHES);
-
-        assertEquals(12.0, result.getValue(), EPSILON);
-        assertEquals(LengthUnit.INCHES, result.getUnit());
+        assertEquals(1000, result.getValue(), 0.01);
     }
-
-    // =====================================================
-    // UC6 – Addition (Implicit Target)
-    // =====================================================
-
-    @Test
-    public void testAddition_SameUnit() {
-
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(2.0, LengthUnit.FEET);
-
-        Length result = l1.add(l2);
-
-        assertEquals(3.0, result.getValue(), EPSILON);
-        assertEquals(LengthUnit.FEET, result.getUnit());
-    }
-
-    @Test
-    public void testAddition_CrossUnit() {
-
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(12.0, LengthUnit.INCHES);
-
-        Length result = l1.add(l2);
-
-        assertEquals(2.0, result.getValue(), EPSILON);
-    }
-
-    // =====================================================
-    // UC7 – Addition with Explicit Target Unit
-    // =====================================================
-
-    @Test
-    public void testAddition_ExplicitTargetUnit_Yards() {
-
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(12.0, LengthUnit.INCHES);
-
-        Length result = Length.add(l1, l2, LengthUnit.YARDS);
-
-        assertEquals(0.666666, result.getValue(), EPSILON);
-        assertEquals(LengthUnit.YARDS, result.getUnit());
-    }
-
-    @Test
-    public void testAddition_Commutativity_WithTarget() {
-
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(12.0, LengthUnit.INCHES);
-
-        Length result1 = Length.add(l1, l2, LengthUnit.FEET);
-        Length result2 = Length.add(l2, l1, LengthUnit.FEET);
-
-        assertEquals(result1.getValue(), result2.getValue(), EPSILON);
-    }
-
-    // =====================================================
-    // Validation Tests
-    // =====================================================
-
-    @Test
-    public void testNullUnit() {
-        assertThrows(NullPointerException.class,
-                () -> new Length(1.0, null));
-    }
-
-    @Test
-    public void testInvalidValue() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new Length(Double.NaN, LengthUnit.FEET));
-    }
-
-    @Test
-    public void testNullTargetUnit_Add() {
-
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(12.0, LengthUnit.INCHES);
-
-        assertThrows(NullPointerException.class,
-                () -> Length.add(l1, l2, null));
-    }
-
-    // =====================================================
-    // Round Trip Precision Test
-    // =====================================================
 
     @Test
     public void testRoundTripConversion() {
+        Quantity<LengthUnit> original = new Quantity<>(5, LengthUnit.FEET);
 
-        double original = 5.0;
+        Quantity<LengthUnit> result =
+                original.convertTo(LengthUnit.INCHES)
+                        .convertTo(LengthUnit.FEET);
 
-        double inches = Length.convert(
-                original,
-                LengthUnit.FEET,
-                LengthUnit.INCHES);
-
-        double back = Length.convert(
-                inches,
-                LengthUnit.INCHES,
-                LengthUnit.FEET);
-
-        assertEquals(original, back, EPSILON);
+        assertTrue(original.equals(result));
     }
 
-    // =====================================================
-    // Architectural Scalability Proof
-    // =====================================================
+    // ================================
+    // ADDITION TESTS
+    // ================================
 
     @Test
-    public void testArchitecturalScalability_Pattern() {
+    public void testLengthAddition() {
+        Quantity<LengthUnit> result =
+                new Quantity<>(1, LengthUnit.FEET)
+                        .add(new Quantity<>(12, LengthUnit.INCHES));
 
-        // Simulating that new unit types could exist independently
-        assertNotNull(LengthUnit.FEET);
-        assertNotNull(LengthUnit.INCHES);
+        assertTrue(result.equals(new Quantity<>(2, LengthUnit.FEET)));
+    }
+
+    @Test
+    public void testLengthAdditionTargetUnit() {
+        Quantity<LengthUnit> result =
+                new Quantity<>(1, LengthUnit.FEET)
+                        .add(new Quantity<>(12, LengthUnit.INCHES),
+                                LengthUnit.INCHES);
+
+        assertTrue(result.equals(new Quantity<>(24, LengthUnit.INCHES)));
+    }
+
+    @Test
+    public void testWeightAddition() {
+        Quantity<WeightUnit> result =
+                new Quantity<>(1, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1000, WeightUnit.GRAM));
+
+        assertTrue(result.equals(new Quantity<>(2, WeightUnit.KILOGRAM)));
+    }
+
+    // ================================
+    // NULL & INVALID TESTS
+    // ================================
+
+    @Test
+    public void testConstructorNullUnit() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Quantity<>(1, null));
+    }
+
+    @Test
+    public void testConstructorNaN() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Quantity<>(Double.NaN, LengthUnit.FEET));
+    }
+
+    @Test
+    public void testConvertToNull() {
+        Quantity<LengthUnit> length =
+                new Quantity<>(1, LengthUnit.FEET);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> length.convertTo(null));
+    }
+
+    @Test
+    public void testAddNull() {
+        Quantity<LengthUnit> length =
+                new Quantity<>(1, LengthUnit.FEET);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> length.add(null));
+    }
+
+    @Test
+    public void testAddNullTarget() {
+        Quantity<LengthUnit> l1 =
+                new Quantity<>(1, LengthUnit.FEET);
+        Quantity<LengthUnit> l2 =
+                new Quantity<>(1, LengthUnit.FEET);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> l1.add(l2, null));
+    }
+
+    // ================================
+    // HASHCODE TEST
+    // ================================
+
+    @Test
+    public void testHashCodeConsistency() {
+        Quantity<LengthUnit> q1 =
+                new Quantity<>(1, LengthUnit.FEET);
+        Quantity<LengthUnit> q2 =
+                new Quantity<>(12, LengthUnit.INCHES);
+
+        assertEquals(q1.hashCode(), q2.hashCode());
+    }
+
+    // ================================
+    // IMMUTABILITY TEST
+    // ================================
+
+    @Test
+    public void testImmutability() {
+        Quantity<LengthUnit> l1 =
+                new Quantity<>(1, LengthUnit.FEET);
+
+        Quantity<LengthUnit> result =
+                l1.convertTo(LengthUnit.INCHES);
+
+        assertNotEquals(l1.getUnit(), result.getUnit());
     }
 }
