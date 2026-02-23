@@ -598,3 +598,38 @@ Cross-category safety
 Precision & immutability
 
 This UC proves the system is open for extension and closed for modification (OCP).
+
+
+## UC12 – Subtraction & Division Support
+
+In this use case, we enhanced the generic Quantity system by adding arithmetic operations beyond addition.
+
+Features Added
+
+subtract(Quantity<U> other)
+
+subtract(Quantity<U> other, U targetUnit)
+
+divide(Quantity<U> other)
+
+Key Improvements
+
+Supports subtraction across compatible units
+
+Supports subtraction with explicit target unit
+
+Supports division (returns ratio as double)
+
+Cross-category safety maintained (Length ≠ Weight ≠ Volume)
+
+Division by zero handled using ArithmeticException
+
+Improved output readability using overridden toString()
+
+Design Impact
+
+No architectural change required
+
+Generic design remains scalable
+
+Fully backward compatible with UC1–UC11
