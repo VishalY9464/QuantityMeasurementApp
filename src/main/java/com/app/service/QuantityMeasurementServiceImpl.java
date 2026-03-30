@@ -303,5 +303,37 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
         List<QuantityMeasurementEntity> entities = repository.findByIsErrorTrue();
         return QuantityMeasurementDTO.fromEntityList(entities);
     }
+    
+    @Override
+    public QuantityMeasurementDTO multiply(QuantityInputDTO input) {
+
+        Quantity<?> q1 = convertDtoToModel(input.getThisQuantityDTO());
+        Quantity<?> q2 = convertDtoToModel(input.getThatQuantityDTO());
+
+        QuantityMeasurementDTO dto = buildBaseDTO(input, q1, q2, "multiply");
+
+        try {
+
+            if (!q1.getUnit().getClass().equals(q2.getUnit().getClass())) {
+                throw new QuantityMeasurementException(
+                    "Cannot perform arithmetic between different measurement categories: "
+                    + getMeasurementType(q1) + " and " + getMeasurementType(q2)
+                );
+            }
+
+            double result = ((Quantity) q1).multiply((Quantity) q2);
+
+            dto.setResultValue(result);
+            dto.setResultMeasurementType(getMeasurementType(q1));
+            dto.setError(false);
+
+        } catch (Exception e) {
+            dto.setErrorMessage("multiply Error: " + e.getMessage());
+            dto.setError(true);
+        }
+
+        saveToRepository(dto);
+        return dto;
+    }
 
 }

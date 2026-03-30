@@ -38,6 +38,8 @@ public class Quantity<U extends IMeasurable> {
 		ADD((a, b) -> a + b),
 
 		SUBTRACT((a, b) -> a - b),
+		
+		MULTIPLY((a, b) -> a * b),
 
 		DIVIDE((a, b) -> {
 			if (b == 0.0)
@@ -159,6 +161,12 @@ public class Quantity<U extends IMeasurable> {
 		return performBaseArithmetic(other, this.unit, ArithmeticOperation.DIVIDE);
 	}
 
+	// MULTIPLY
+	public double multiply(Quantity<U> other) {
+	    validateArithmeticOperands(other, null, false);
+	    return performBaseArithmetic(other, this.unit, ArithmeticOperation.MULTIPLY);
+	}
+	
 	// Equality & Hashing
 	@Override
 	public boolean equals(Object obj) {

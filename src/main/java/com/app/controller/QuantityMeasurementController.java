@@ -1,7 +1,6 @@
 package com.app.controller;
 
 import com.app.dto.QuantityInputDTO;
-
 import com.app.dto.QuantityMeasurementDTO;
 import com.app.service.IQuantityMeasurementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/quantities")
 @Tag(name = "Quantity Measurements", description = "REST API for quantity measurement operations")
+@CrossOrigin
 public class QuantityMeasurementController {
 
     @Autowired
@@ -102,6 +102,24 @@ public class QuantityMeasurementController {
 
         try {
             QuantityMeasurementDTO result = service.divide(quantityInputDTO);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            QuantityMeasurementDTO error = new QuantityMeasurementDTO();
+            error.setErrorMessage(e.getMessage());
+            error.setError(true);
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+    
+ // ================= MULTIPLY =================
+
+    @PostMapping("/multiply")
+    @Operation(summary = "Multiply two quantities")
+    public ResponseEntity<QuantityMeasurementDTO> multiplyQuantities(
+            @Valid @RequestBody QuantityInputDTO quantityInputDTO) {
+
+        try {
+            QuantityMeasurementDTO result = service.multiply(quantityInputDTO);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             QuantityMeasurementDTO error = new QuantityMeasurementDTO();
